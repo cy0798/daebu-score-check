@@ -1,10 +1,10 @@
 import streamlit as st
-import pandas as pd
+import pandas as pd  # <--- 에러를 해결하는 핵심 선언 추가!
 
 # 페이지 기본 설정
 st.set_page_config(page_title="대부고 수행평가 성적 검사", layout="wide")
 
-# 상단 디자인 꾸미기 (에러 원인이었던 HTML 옵션 완벽 수정)
+# 上단 디자인 꾸미기
 st.markdown("""
 <style>
     .stApp { background-color: #f8fafc; font-family: 'Malgun Gothic', sans-serif; }
@@ -47,45 +47,4 @@ DAEBU_SUBJECTS = {
     "음악": {"가창 수행 평가": {"만점": 30, "최저점수": 12}, "기악 연주 평가": {"만점": 30, "최저점수": 12}, "음악 감상 비평문": {"만점": 20, "최저점수": 8}},
     "미술": {"발상과 표현 회화 작업": {"만점": 40, "최저점수": 16}, "표현 매체 탐구": {"만점": 40, "최저점수": 16}, "미술 비평 소감문 작성": {"만점": 20, "최저점수": 8}},
     "한문 I": {"나만의 성어 사전 만들기": {"만점": 20, "최저점수": 4}},
-    "정보": {"프로그래밍 실습": {"만점": 30, "최저점수": 12}, "알고리즘 설계": {"만점": 30, "최저점수": 12}, "정보 윤리 카드뉴스": {"만점": 20, "최저점수": 8}}
-}
-
-selected_subject = st.selectbox("📋 검사할 과목을 드롭다운에서 선택하세요", list(DAEBU_SUBJECTS.keys()))
-subject_rules = DAEBU_SUBJECTS[selected_subject]
-
-st.info(f"💡 **[{selected_subject}] 수행평가 기준 정보**")
-cols = st.columns(len(subject_rules))
-for i, (area, limits) in enumerate(subject_rules.items()):
-    with cols[i]:
-        st.metric(label=f"📌 {area}", value=f"만점: {limits['만점']}점", delta=f"최저: {limits['최저점수']}점", delta_color="inverse")
-
-uploaded_file = st.file_uploader("📂 나이스에서 다운로드한 성적 엑셀 파일(.xlsx)을 넣어주세요", type=["xlsx"])
-
-if uploaded_file:
-    try:
-        excel_data = pd.ExcelFile(uploaded_file)
-        raw_df = excel_data.parse(sheet_name=0, header=None)
-        
-        header_row_idx = None
-        for idx in range(len(raw_df)):
-            row_values = raw_df.iloc[idx].dropna().astype(str).tolist()
-            row_text = "".join(row_values).replace(" ", "")
-            if "성명" in row_text or "이름" in row_text:
-                header_row_idx = idx
-                break
-        
-        if header_row_idx is not None:
-            df = excel_data.parse(sheet_name=0, skiprows=header_row_idx)
-            df.columns = [str(c).strip().replace("\n", "").replace(" ", "") for c in df.columns]
-        else:
-            df = excel_data.parse(sheet_name=0)
-            df.columns = [str(c).strip().replace("\n", "").replace(" ", "") for c in df.columns]
-
-        errors = []
-
-        name_col = next((c for c in df.columns if "성명" in c or "이름" in c), None)
-        num_col = next((c for c in df.columns if "반" in c or "번호" in c or "학번" in c), None)
-
-        if name_col:
-            for idx, row in df.iterrows():
-                student_name = str(row
+    "정보": {"프로그래밍 실습": {"만점": 30, "최저점수": 12}, "알고리즘 설계": {"만점": 30, "최저점수": 12}, "정보 윤리 카드뉴스": {"만점": 2
