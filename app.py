@@ -31,4 +31,106 @@ DAEBU_SUBJECTS = {
     "확률과 통계": {"경우의 수 문제 해결하기": {"만점": 20, "최저점수": 6}, "통계 자료 분석 프로젝트": {"만점": 20, "최저점수": 8}},
     "미적분": {"미분과 적분의 개념 지도": {"만점": 20, "최저점수": 8}, "실생활 미적분 문제 해결": {"만점": 20, "최저점수": 8}},
     "공통영어1": {"에세이 쓰기": {"만점": 20, "최저점수": 8}, "주제 발표": {"만점": 20, "최저점수": 8}, "수업 참여 포트폴리오": {"만점": 10, "최저점수": 4}},
-    "한국사1": {"역사 인물 탐구 보고서": {"만점": 20, "최저점수": 8}, "역사 지도 제작
+    "한국사1": {"역사 인물 탐구 보고서": {"만점": 20, "최저점수": 8}, "역사 지도 제작하기": {"만점": 20, "최저점수": 8}},
+    "통합사회1": {"수업 참여 및 배움일지": {"만점": 10, "최저점수": 4}, "사회 문제 탐구 포트폴리오": {"만점": 30, "최저점수": 12}},
+    "세계지리": {"지리 정보 분석 보고서": {"만점": 20, "최저점수": 8}, "기후 변화 대응 포스터": {"만점": 20, "최저점수": 8}},
+    "윤리와 사상": {"사상가 가상 인터뷰 쓰기": {"만점": 25, "최저점수": 10}, "도덕적 딜레마 토론": {"만점": 15, "최저점수": 6}},
+    "생활과 윤리": {"현대 윤리 문제 에세이": {"만점": 20, "최저점수": 8}, "윤리적 쟁점 포트폴리오": {"만점": 20, "최저점수": 8}},
+    "통합과학1": {"과학 실험 보고서 작성": {"만점": 20, "최저점수": 8}, "과학 탐구 포트폴리오": {"만점": 20, "최저점수": 8}},
+    "과학탐구실험": {"실험 수행 평가": {"만점": 20, "최저점수": 8}, "탐구 프로젝트": {"만점": 20, "최저점수": 8}, "포트폴리오": {"만점": 10, "최저점수": 4}},
+    "화학Ⅰ": {"화학 반응 실험 수행": {"만점": 25, "최저점수": 10}, "원소 스토리텔링 발표": {"만점": 15, "최저점수": 6}},
+    "화학Ⅱ": {"화학 평형 탐구 활동": {"만점": 30, "최저점수": 12}},
+    "생명과학Ⅰ": {"세포 분열 관찰": {"만점": 20, "최저점수": 8}, "유전 현상 분석": {"만점": 20, "최저점수": 8}, "과학 글쓰기": {"만점": 10, "최저점수": 4}},
+    "지구과학Ⅰ": {"지질 구조 탐구": {"만점": 20, "최저점수": 8}, "기후 변화 발표": {"만점": 20, "최저점수": 8}, "수행 포트폴리오": {"만점": 10, "최저점수": 4}},
+    "체육": {"체력 측정 및 운동 계획": {"만점": 30, "최저점수": 12}, "구기 경기 기능 평가": {"만점": 30, "최저점수": 12}, "운동 실천 일지": {"만점": 20, "최저점수": 8}},
+    "운동과 건강": {"건강 체력 평가": {"만점": 40, "최저점수": 16}, "운동 처방 리포트": {"만점": 40, "최저점수": 16}},
+    "음악": {"가창 수행 평가": {"만점": 30, "최저점수": 12}, "기악 연주 평가": {"만점": 30, "최저점수": 12}, "음악 감상 비평문": {"만점": 20, "최저점수": 8}},
+    "미술": {"발상과 표현 회화 작업": {"만점": 40, "최저점수": 16}, "표현 매체 탐구": {"만점": 40, "최저점수": 16}, "미술 비평 소감문 작성": {"만점": 20, "최저점수": 8}},
+    "한문 I": {"나만의 성어 사전 만들기": {"만점": 20, "최저점수": 4}},
+    "정보": {"프로그래밍 실습": {"만점": 30, "최저점수": 12}, "알고리즘 설계": {"만점": 30, "최저점수": 12}, "정보 윤리 카드뉴스": {"만점": 20, "최저점수": 8}}
+}
+
+selected_subject = st.selectbox("📋 검사할 과목을 드롭다운에서 선택하세요", list(DAEBU_SUBJECTS.keys()))
+subject_rules = DAEBU_SUBJECTS[selected_subject]
+
+st.info(f"💡 **[{selected_subject}] 수행평가 기준 정보**")
+cols = st.columns(len(subject_rules))
+for i, (area, limits) in enumerate(subject_rules.items()):
+    with cols[i]:
+        st.metric(label=f"📌 {area}", value=f"만점: {limits['만점']}점", delta=f"최저: {limits['최저점수']}점", delta_color="inverse")
+
+uploaded_file = st.file_uploader("📂 나이스에서 다운로드한 성적 엑셀 파일(.xlsx)을 넣어주세요", type=["xlsx"])
+
+if uploaded_file:
+    try:
+        excel_data = pd.ExcelFile(uploaded_file)
+        raw_df = excel_data.parse(sheet_name=0, header=None)
+        
+        header_row_idx = None
+        for idx in range(len(raw_df)):
+            row_values = raw_df.iloc[idx].dropna().astype(str).tolist()
+            row_text = "".join(row_values).replace(" ", "")
+            if "성명" in row_text or "이름" in row_text:
+                header_row_idx = idx
+                break
+        
+        if header_row_idx is not None:
+            df = excel_data.parse(sheet_name=0, skiprows=header_row_idx)
+            df.columns = [str(c).strip().replace("\n", "").replace(" ", "") for c in df.columns]
+        else:
+            df = excel_data.parse(sheet_name=0)
+            df.columns = [str(c).strip().replace("\n", "").replace(" ", "") for c in df.columns]
+
+        errors = []
+
+        name_col = next((c for c in df.columns if "성명" in c or "이름" in c), None)
+        num_col = next((c for c in df.columns if "반" in c or "번호" in c or "학번" in c), None)
+
+        if name_col:
+            for idx, row in df.iterrows():
+                student_name = str(row[name_col]).strip()
+                
+                if pd.isna(row[name_col]) or student_name in ["nan", "", "합계", "평균", "교과", "담당", "인"]:
+                    continue
+                if "학년" in student_name or "학기" in student_name or "과목" in student_name:
+                    continue
+                    
+                student_num = str(row[num_col]).strip() if num_col and not pd.isna(row[num_col]) else f"{idx+1}번"
+
+                for area, limits in subject_rules.items():
+                    clean_area = area.replace(" ", "")
+                    target_col = next((c for c in df.columns if clean_area in c), None)
+                    
+                    if target_col:
+                        score = row[target_col]
+                        
+                        if pd.isna(score) or str(score).strip() == "":
+                            errors.append({
+                                "반/번호": student_num, "성명": student_name, "수행평가 항목": area,
+                                "오류 유형": "점수 누락(빈칸)", "입력값": "없음", "올바른 기준": "점수 입력 필수"
+                            })
+                        else:
+                            clean_score = str(score).strip()
+                            
+                            is_numeric = False
+                            try:
+                                score_float = float(clean_score)
+                                is_numeric = True
+                            except ValueError:
+                                pass
+                                
+                            if is_numeric:
+                                if score_float > limits["만점"]:
+                                    errors.append({
+                                        "반/번호": student_num, "성명": student_name, "수행평가 항목": area,
+                                        "오류 유형": "🔴 만점 초과 오류", 
+                                        "입력값": f"{clean_score}점", "올바른 기준": f"{limits['만점']}점 이하"
+                                    })
+                                elif score_float < limits["최저점수"]:
+                                    errors.append({
+                                        "반/번호": student_num, "성명": student_name, "수행평가 항목": area,
+                                        "오류 유형": "⚠️ 최저점수(기본점수) 미달",
+                                        "입력값": f"{clean_score}점", "올바른 기준": f"{limits['최저점수']}점 이상 입력"
+                                    })
+                            else:
+                                if clean_score
