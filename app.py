@@ -74,12 +74,13 @@ if uploaded_file:
                 header_row_idx = idx
                 break
         
+        # 어떤 상황에서도 df가 미정의 상태로 남지 않도록 초기화 안전 기지 구축
         if header_row_idx is not None:
             df = excel_data.parse(sheet_name=0, skiprows=header_row_idx)
-            df.columns = [str(c).strip().replace("\n", "").replace(" ", "") for c in df.columns]
         else:
             df = excel_data.parse(sheet_name=0)
-            df.columns = [str(c).strip().replace("\n", "").replace(" ", "") for c in df.columns]
+            
+        df.columns = [str(c).strip().replace("\n", "").replace(" ", "") for c in df.columns]
 
         errors = []
 
@@ -128,9 +129,4 @@ if uploaded_file:
                                     })
                                 elif score_float < limits["최저점수"]:
                                     errors.append({
-                                        "반/번호": student_num, "성명": student_name, "수행평가 항목": area,
-                                        "오류 유형": "⚠️ 최저점수(기본점수) 미달",
-                                        "입력값": f"{clean_score}점", "올바른 기준": f"{limits['최저점수']}점 이상 입력"
-                                    })
-                            else:
-                                if clean_score
+                                        "반/
